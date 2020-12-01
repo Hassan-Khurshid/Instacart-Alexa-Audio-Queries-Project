@@ -60,14 +60,14 @@ def countQuery(table, database):
     db = 'ABCRetail' if database=='abc retail' else 'Instacart'
     query = 'select count(*) from {}.{}'.format(db, table)
     result = db_functions.executeQuery(query, 'MySQL', db)
-
-    text = render_template('alexa.html', 
+    print(result)
+    text = render_template('index.html', 
                             query=result[1], 
                             col_names=result[0], 
                             service_type='MySQL', 
                             db_type=db)
 
-    return statement(text)
+    return statement('Okay!')
 
 
 if __name__ == '__main__':
