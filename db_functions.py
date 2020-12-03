@@ -17,13 +17,13 @@ mysql_abc = pymysql.connect(
     db = 'abc_retail'
 )
 
-redshift = psycopg2.connect(
-    user = "group3",
-    password = "group3PW!",
-    host = "redshift-cluster-1.cw5prwl0hut7.us-east-2.redshift.amazonaws.com",
-    port = '5439',
-    database = "instacart_red"
-)
+# redshift = psycopg2.connect(
+#     user = "group3",
+#     password = "group3PW!",
+#     host = "redshift-cluster-1.cw5prwl0hut7.us-east-2.redshift.amazonaws.com",
+#     port = '5439',
+#     database = "instacart_red"
+# )
 
 """
 Executes query requested by user. 
@@ -31,12 +31,12 @@ Executes query requested by user.
 
 def executeQuery(query, service_type, db_type):
     if service_type == 'MySQL':
-        if db_type =='ABCRetail':
+        if db_type =='abc_retail':
             cursor = mysql_abc.cursor()
         else:
             cursor = mysql_insta.cursor()
-    else:
-        cursor = redshift.cursor()
+    # else:
+    #     cursor = redshift.cursor()
 
     cursor.execute(query)
     result = cursor.fetchall() 

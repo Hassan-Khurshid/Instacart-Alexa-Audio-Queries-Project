@@ -57,17 +57,18 @@ def start_skill():
 
 @ask.intent('ExecuteQuery')
 def countQuery(table, database):
-    db = 'ABCRetail' if database=='abc retail' else 'Instacart'
+    db = 'abc_retail' if database=='abc retail' else 'cs527_instacart'
     query = 'select count(*) from {}.{}'.format(db, table)
+    print(db)
     result = db_functions.executeQuery(query, 'MySQL', db)
-    print(result)
+
     text = render_template('index.html', 
                             query=result[1], 
                             col_names=result[0], 
                             service_type='MySQL', 
                             db_type=db)
 
-    return statement('Okay!')
+    return statement('There are {} {}s'.format(result[1], table))
 
 
 if __name__ == '__main__':
