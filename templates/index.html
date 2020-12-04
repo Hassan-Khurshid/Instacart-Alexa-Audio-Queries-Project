@@ -6,57 +6,12 @@
 {%block body%}
 <div class="container my-5">
    <div class="row-fluid">
-      <h1 class="display-2 text-center">CS527 SQL App</h1>
-      <form class = "form" action="/queryresults" method="POST">
-         <div class="form-group">
-            <label for="query">SQL Query:</label>
-            <!-- <input type="text" name="query" class="form-control" id="query" placeholder="SELECT ..."> -->
-            <textarea class="form-control" id="query" name="query" placeholder="SELECT ..."></textarea>
-         </div>
-         <br>
-         <p>Select service type:</p>
-         <div class="form-group">
-            <div class="form-check">
-               <input class="form-check-input" type="radio" name="serviceop" id="MySQL" value="MySQL">
-               <label class="form-check-label" for="exampleRadios1">
-                  MySQL
-               </label>
-            </div>
-            <div class="form-check">
-               <input class="form-check-input" type="radio" name="serviceop" id="Redshift" value="Redshift">
-               <label class="form-check-label" for="exampleRadios1">
-                  RedShift
-               </label>
-            </div>
-
-            <br>
-
-            <p>Select database:</p>
-            <div class="form-check">
-               <input class="form-check-input" type="radio" name="dbop" id="Instacart" value="Instacart">
-               <label class="form-check-label" for="exampleRadios1">
-                  Instacart
-               </label>
-            </div>
-
-            <div class="form-check">
-               <input class="form-check-input" type="radio" name="dbop" id="ABCRetail" value="ABCRetail">
-               <label class="form-check-label" for="exampleRadios1">
-                  ABC Retail
-               </label>
-            </div>
-         </div>
-         <div>
-            <h5>Reference diagrams:</h5>
-            <p><a href="https://cs527-img.s3.us-east-2.amazonaws.com/abc_ER.png", target="_blank">The ER diagram for ABC Retail</a></p>
-            <p><a href="https://cs527-img.s3.us-east-2.amazonaws.com/instacart_ED.png", target="_blank">The ER diagram for Instacart</a></p>
-         </div>
-         <div class="form-group">
-            <button type="submit" class="btn btn-primary">
-               Run
-            </button>
-         </div>
-      </form>
+      <h1 class="display-2 text-center">CS527 SQL App - Alexa</h1>
+      <div>
+        <h5>Reference diagrams:</h5>
+        <p><a href="https://cs527-img.s3.us-east-2.amazonaws.com/abc_ER.png", target="_blank">The ER diagram for ABC Retail</a></p>
+        <p><a href="https://cs527-img.s3.us-east-2.amazonaws.com/instacart_ED.png", target="_blank">The ER diagram for Instacart</a></p>
+      </div>
    </div>
 
    {% if service_type %}
