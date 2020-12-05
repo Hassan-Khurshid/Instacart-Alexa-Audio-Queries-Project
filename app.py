@@ -26,33 +26,27 @@ def index():
 def runQuery():
     if request.method == 'POST':
 
-        mydata = request.args.get('query')
-        print(mydata)
-
-        # query = session['query']
-        # if query == "":
-        #     return render_template('index.html')
-        # service_type = session['service_type']
-        # database_type = session['db_type']
-        # col_names = session['col_names']
-
-        # capture start time #
-        start_time = time.time()
+        query = request.args.get('query')
+        service_type = 'MySQL'
+        db_type = request.args.get('db_type')
 
         # execute user query #
-        #result = db_functions.executeQuery(query, service_type, database_type)
-       
-        # capture end time #
-        end_time = time.time()
-
-        # render result #
+        result = db_functions.executeQuery(query, service_type, db_type)
         
-        return render_template('index.html', 
-                                query=result[1], 
-                                col_names=result[0], 
-                                service_type=service_type, 
-                                db_type=database_type, 
-                                time=(end_time-start_time))
+        # render result #
+        print(query, ',', result[0], ',', service_type, ',' ,db_type)
+        msg =  render_template('index.html', 
+                            query=result[1], 
+                            col_names=result[0], 
+                            service_type='MySQL', 
+                            db_type=db_type)
+    
+        return msg
+        # return jsonify({'html':render_template('index.html',query=result[1], 
+        #                                                     col_names=result[0], 
+        #                                                     service_type='MySQL', 
+        #                                                     db_type=db_type)})
+
 
 ## alexa decorators and setup ##
 @ask.launch
@@ -101,24 +95,19 @@ def selectQuery(table, database, attribute=None, value=None, comparison=None, st
                 query += ' = {}'.format(value)
 
         
-    print(query)
-    result = db_functions.executeQuery(query, 'MySQL', db)
-
-    headers = {}
-    payload = {'query':result[1],'col_names':result[0], 'service_type':'MySQL', 'db_type':db}
+    #result = db_functions.executeQuery(query, 'MySQL', db)
+    payload = {'query':query, 'service_type':'MySQL', 'db_type':db}
+    headers = {'Content-type': 'text/html'}
+    request_url = 'http://127.0.0.1:5000/alexaresults?query={}&db_type={}'.format(query, db)
 
     #session = requests.Session()
-    requests.post(url='http://127.0.0.1:5000/alexaresults',data=payload)
+    try:
+        #requests.post(url='http://127.0.0.1:5000/alexaresults')
+        post = requests.post(url=request_url, headers = headers, allow_redirects=True)
+    except requests.ConnectionError as e:
+        print('Error!!!')
+        print(e)
 
-    #print(result)
-    # with app.app_context():
-    #     msg = render_template('index.html', 
-    #                         query=result[1], 
-    #                         col_names=result[0], 
-    #                         service_type='MySQL', 
-    #                         db_type=db)
-
-    #print(msg)
     return statement('View website to see results!')
 
 if __name__ == '__main__':
