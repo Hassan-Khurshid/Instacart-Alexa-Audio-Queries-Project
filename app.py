@@ -13,6 +13,9 @@ import logging
 import threading
 import time
 
+import pymysql
+import csv
+import sys
 
 app = Flask(__name__)
 application=app
@@ -45,6 +48,7 @@ def runQuery():
         return msg
 
 
+
 ## alexa decorators and setup ##
 @ask.launch
 def start_skill():
@@ -68,55 +72,80 @@ def start_skill():
 
 
 @ask.intent('SelectAllQuery')
-def selectQuery(table, database, attribute=None, value=None, comparison=None, stringValue=None):
+def selectQuery(table, database, attribute=None, value=None, comparison=None, stringvalue=None):
     db = 'abc_retail' if database=='a. b. c. retail' else 'cs527_instacart'
     query = "select * from {}.{}".format(db, table)
 
-    # if attribute is not None:
-    #     query += ' where {}'.format(attribute)
+    newattrib = attribute
+    attributenew = attribute.split(' ')
 
-    #     if stringValue is not None:
-    #         query += ' = \'{}\''.format(stringValue)
-    #     elif value is not None:
-    #         if comparison == 'less':
-    #             query += ' < {}'.format(value)
-    #         elif comparison == 'greater':
-    #             query += ' > {}'.format(value)
-    #         elif comparison == 'less than or equal':
-    #             query += ' <= {}'.format(value)
-    #         elif comparison == 'greater than or equal':
-    #            query += ' >= {}'.format(value) 
-    #         elif comparison == 'not equal':
-    #             query += ' != {}'.format(value)
-    #         else:
-    #             query += ' = {}'.format(value)
+    if len(attributenew)>1:
+        newattrib = ""
+        for i in range(len(attributenew)):
+            if i == len(attributenew)-1:
+                newattrib+=attributenew[i]
+            else:
+                newattrib+=attributenew[i]+'_'
+    print(newattrib)
+
+    if newattrib is not None:
+        query += ' where {}'.format(newattrib)
+
+        if stringvalue is not None:
+            query += ' = \'{}\''.format(stringvalue)
+        elif value is not None:
+            if comparison == 'less':
+                query += ' < {}'.format(value)
+            elif comparison == 'greater':
+                query += ' > {}'.format(value)
+            elif 'less than or equal' in comparison:
+                query += ' <= {}'.format(value)
+            elif 'greater than or equal' in comparison:
+               query += ' >= {}'.format(value) 
+            elif 'not equal' in comparison:
+                query += ' != {}'.format(value)
+            else:
+                query += ' = {}'.format(value)
 
     
-    payload = {'query':query, 'service_type':'MySQL', 'db_type':db}
-    headers = {'Content-type': 'text/html'}
-    request_url = 'http://127.0.0.1:5000/alexaresults?query={}&db_type={}'.format(query, db)
+    # payload = {'query':query, 'service_type':'MySQL', 'db_type':db}
+    # headers = {'Content-type': 'text/html'}
+    # request_url = 'http://127.0.0.1:5000/alexaresults?query={}&db_type={}'.format(query, db)
 
     #session = requests.Session()
-    try:
-        #post = requests.post(url=request_url, headers = headers, allow_redirects=True, timeout=5)
 
-        x = threading.Thread(target=sendPostRequest, args=(1, payload, headers, request_url))  
-        x.start()
-        x.join()
+    print(query)
+    
+    createResultCSV(query, 'MySQL', db)
 
-    except requests.ConnectionError as e:
-        print('Error!!!')
-        print(e)
+    return statement('View directory to see results!')
 
-    exit()
-    return statement('View website to see results!')
+def createResultCSV(query, service_type, db_type):
+    result = db_functions.executeQuery(query, service_type, db_type)
+
+    if len(result[1])>0:
+        rows = list()
+        for row in result[1]:
+            rows.append(row)
+
+        with open('queryresults.csv', 'w') as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=result[0], delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            writer.writeheader()
+            for row in rows:
+                row_dict = dict(zip(result[0],list(row)))
+                #print(row_dict)
+
+                writer.writerow(row_dict)
 
 
-def sendPostRequest(name, payload, headers, request_url):
-    time.sleep(2)
-    requests.post(url=request_url, headers = headers, allow_redirects=True)
+
+# def sendPostRequest(name, payload, headers, request_url):
+#     time.sleep(2)
+#     requests.post(url=request_url, headers = headers, allow_redirects=True)
 
 
 if __name__ == '__main__':
     #app.run(host='0.0.0.0', port=8080)
     app.run(debug=True)
+
+
