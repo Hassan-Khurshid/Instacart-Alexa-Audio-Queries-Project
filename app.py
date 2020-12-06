@@ -55,40 +55,28 @@ def start_skill():
     welcome_msg = 'Hello! Invoke execute query to execute a sequel query!'
     return statement(welcome_msg)
 
-# @ask.intent('ExecuteQuery')
-# def countQuery(table, database):
-#     db = 'abc_retail' if database=='a. b. c. retail' else 'cs527_instacart'
-#     query = 'select count(*) from {}.{}'.format(db, table)
-#     print(db)
-#     result = db_functions.executeQuery(query, 'MySQL', db)
-
-#     text = render_template('alexa.html', 
-#                             query=result[1], 
-#                             col_names=result[0], 
-#                             service_type='MySQL', 
-#                             db_type=db)
-
-#     return statement('There are {} {}s'.format(result[1], table))
-
-
 @ask.intent('SelectAllQuery')
 def selectQuery(table, database, attribute=None, value=None, comparison=None, stringvalue=None):
-    db = 'abc_retail' if database=='a. b. c. retail' else 'cs527_instacart'
-    query = "select * from {}.{}".format(db, table)
+    db = 'instacart' if database=='instacart' else 'abc_retail'
+    newTable = table if db=='instacart' else table.capitalize()
+    query = "select * from {}.{}".format(db, newTable)
 
-    newattrib = attribute
-    attributenew = attribute.split(' ')
 
-    if len(attributenew)>1:
-        newattrib = ""
-        for i in range(len(attributenew)):
-            if i == len(attributenew)-1:
-                newattrib+=attributenew[i]
-            else:
-                newattrib+=attributenew[i]+'_'
-    print(newattrib)
 
-    if newattrib is not None:
+
+    if attribute is not None:
+        newattrib = attribute
+        attributenew = attribute.split(' ')
+
+        if len(attributenew)>1:
+            newattrib = ""
+            for i in range(len(attributenew)):
+                if i == len(attributenew)-1:
+                    newattrib+=attributenew[i]
+                else:
+                    newattrib+=attributenew[i]+'_'
+        print(newattrib)
+
         query += ' where {}'.format(newattrib)
 
         if stringvalue is not None:
@@ -120,6 +108,68 @@ def selectQuery(table, database, attribute=None, value=None, comparison=None, st
 
     return statement('View directory to see results!')
 
+
+@ask.intent('GroupByIntent')
+def groupByQuery(attribute, table, database, groupby, attributetwo=None,comparison=None, value=None, attributethree=None, order=None):
+    db = 'abc_retail' if database=='a. b. c. retail' else 'cs527_instacart'
+
+    
+    print(attribute, attributetwo)
+
+
+    newAttrib = attributeFormatter(attribute)
+    newGroupBy = attributeFormatter(groupby)
+
+    if newAttrib == 'all':
+        newAttrib = '*'
+
+    query = "select count({}) from {}.{} group by {}".format(newAttrib, db, table, newGroupBy)
+    #print(query)
+
+    if attributetwo is not None:
+        newAttrib2 = attributeFormatter(attributetwo)
+        if newAttrib2 == 'all':
+            newAttrib2 = '*'
+
+        query+= " having count({})".format(newAttrib2)
+
+        if comparison == 'less':
+            query += ' < {}'.format(value)
+        elif comparison == 'greater':
+            query += ' > {}'.format(value)
+        elif 'less than or equal' in comparison:
+            query += ' <= {}'.format(value)
+        elif 'greater than or equal' in comparison:
+            query += ' >= {}'.format(value) 
+        elif 'not equal' in comparison:
+            query += ' != {}'.format(value)
+        else:
+            query += ' = {}'.format(value)    
+
+    if order is not None:
+        newOrder = order
+        if order == 'ascending':
+            newOrder = 'asc'
+        elif order == 'descending':
+            newOrder = 'desc'
+ 
+
+        query+= ' order by '
+
+        if attributethree is not None:
+            newAttrib3 = attributeFormatter(attributethree)
+            query+='count({})'.format(newAttrib3)
+        
+        query += ' {}'.format(newOrder)
+            
+
+
+    print(query)
+
+    createResultCSV(query, 'MySQL', db)
+
+    return statement('View directory to see results!')
+
 def createResultCSV(query, service_type, db_type):
     result = db_functions.executeQuery(query, service_type, db_type)
 
@@ -139,9 +189,21 @@ def createResultCSV(query, service_type, db_type):
 
 
 
-# def sendPostRequest(name, payload, headers, request_url):
-#     time.sleep(2)
-#     requests.post(url=request_url, headers = headers, allow_redirects=True)
+def attributeFormatter(attribute):
+    if attribute == 'department id':
+        return 'dept_id'
+
+    newattrib = attribute
+    attributenew = attribute.split(' ')
+
+    if len(attributenew)>1:
+        newattrib = ""
+        for i in range(len(attributenew)):
+            if i == len(attributenew)-1:
+                newattrib+=attributenew[i]
+            else:
+                newattrib+=attributenew[i]+'_'
+    return newattrib
 
 
 if __name__ == '__main__':
