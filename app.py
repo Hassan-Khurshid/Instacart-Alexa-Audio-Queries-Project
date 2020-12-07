@@ -57,11 +57,10 @@ def start_skill():
 
 @ask.intent('SelectAllQuery')
 def selectQuery(table, database, attribute=None, value=None, comparison=None, stringvalue=None):
-    db = 'instacart' if database=='instacart' else 'abc_retail'
-    newTable = table if db=='instacart' else table.capitalize()
+    print(database)
+    db = 'abc_retail' if database=='ABC retail' else 'cs527_instacart'
+    newTable = table if db=='cs527_instacart' else table.capitalize()
     query = "select * from {}.{}".format(db, newTable)
-
-
 
 
     if attribute is not None:
@@ -111,7 +110,7 @@ def selectQuery(table, database, attribute=None, value=None, comparison=None, st
 
 @ask.intent('GroupByIntent')
 def groupByQuery(attribute, table, database, groupby, attributetwo=None,comparison=None, value=None, attributethree=None, order=None):
-    db = 'abc_retail' if database=='a. b. c. retail' else 'cs527_instacart'
+    db = 'cs527_instacart' if database=='instacart' else 'abc_retail'
 
     
     print(attribute, attributetwo)
